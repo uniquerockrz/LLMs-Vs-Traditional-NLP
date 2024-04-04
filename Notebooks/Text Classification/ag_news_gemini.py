@@ -81,6 +81,7 @@ for index, row in df_test.iterrows():
             retry_count = 0
             break
         except Exception as e:
+            print(e)
             print('*** Sleeping For Rate Limiting ***')
             time.sleep(10)
             retry_count = retry_count + 1
