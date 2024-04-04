@@ -29,12 +29,12 @@ classification = glm.Schema(
 classify_news_article = glm.FunctionDeclaration(
     name="classify_news_article",
     description=textwrap.dedent("""\
-        Classify the news article into one of the four categories: world, sports, business, technology
+        Classify the news article into one of the five categories: world, sports, business, technology, science. 
         """),
     parameters=glm.Schema(
         type=glm.Type.OBJECT,
         properties = {
-            'classification_label': classification
+            'classification': classification
         }
     )
 )
@@ -43,13 +43,20 @@ model = genai.GenerativeModel(model_name='gemini-1.0-pro', tools = [classify_new
 
 def get_gemini_classification(news_text):
     result = model.generate_content(f"""
-    Please classify the provided news article into one of the following categories: world, sports, business, technology. Do not return null as a classification label.
+    I will be giving a news article or a headline. You will have to classify that into one of the following categories. Choose world if no other category is appropriate. Return only the classification label.\n
+    Categories:\n
+    - world\n
+    - sports\n
+    - business\n
+    - technology\n
+    - science\n
 
-        {news_text}
+    Article: {news_text}
     """)
     
     fc_result = result.candidates[0].content.parts[0].function_call
-    label = type(fc_result).to_dict(fc_result)['args']['classification_label']['classification_label']
+    label = type(fc_result).to_dict(fc_result)['args']['classification']['classification_label']
+
     if label == 'world':
         return 0
     if label == 'sports':
@@ -57,6 +64,8 @@ def get_gemini_classification(news_text):
     if label == 'business':
         return 2
     if label == 'technology':
+        return 3
+    if label == 'science':
         return 3
 
 res_list = []
